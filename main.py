@@ -66,17 +66,15 @@ class Painter():
             if c == self.hiddenTile():
                 tile = c.paint()
                 # show current time in bottom-right corner
-                t = c.formattedTime()
-                txtImg = fontLarge.render(t,1,WHITE)
-                w = txtImg.get_width()
-                h = txtImg.get_height()
-                recw = w*1.1
-                rech = h*0.9
-                shade(1024-recw,600-rech,recw,rech,scr,GREY,70)
-                pygame.draw.rect(scr, WHITE, (1024-recw,600-rech,recw+3,rech+3),2)
-                #textAt(1023,550,t,scr,fontLarge,BLACK,align=RIGHT)
-                #textAt(1022,549,t,scr,fontLarge,WHITE,align=RIGHT)
-                scr.blit(txtImg, (1023-w,600-h))
+                t = c.formattedTime()   # h:mm
+                if int(time.time()) % 2 == 0:   # Flash ':' every other second
+                    t = t.replace(":"," ")
+                txtRed = fontLCDMedium.render(t,1,(243,0,0))  
+                txtPink = fontLCDMedium.render(t,1,(243,140,140))  
+                w = txtRed.get_width()
+                h = txtRed.get_height()
+                scr.blit(txtPink, (1023-w,599-h))
+                scr.blit(txtRed, (1024-w,600-h))
 
             #mx,my = pygame.mouse.get_pos()
             #s=str(mx)+", "+str(my)
