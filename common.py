@@ -44,6 +44,7 @@ fontLarge  = pygame.font.Font('century.ttf',45)
 fontMedium = pygame.font.Font('century.ttf',35)
 fontSmall  = pygame.font.Font('century.ttf',28)
 fontTiny = pygame.font.Font(None,32)
+fontLCDMedium = pygame.font.Font('lcd.ttf',36)
 
 # THREADING
 threadLock = threading.Lock()
