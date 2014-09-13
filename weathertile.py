@@ -22,21 +22,8 @@ class WeatherTile():
 
     def refresh(self):
         if self.nextUpdate < time.time():
-            print "fetch start"
             self.weather.fetch()
-            print "fetch end"
 
-            
-    # Daytime calculation based on sunrise/sunset
-    def dayTime(self):
-            daystart = time2hours(self.weather.astronomy('sunrise'))
-            dayend = time2hours(self.weather.astronomy('sunset'))
-            now = time2hours(time.strftime('%I:%M %p'))
-            if now >= daystart and now <= dayend:
-                dayTime = True
-            else:
-                dayTime = False
-            return dayTime
 
     # React to any screen touches
     def processTouch(self,x,y):
@@ -48,9 +35,7 @@ class WeatherTile():
         if time.time() > self.nextUpdate:
             with threadLock:
                 self.nextUpdate = time.time() + 60 * self.UPDATE_INTERVAL
-            print "fetch start"
             self.weather.fetch()
-            print "fetch end"
         # Start with an empty tile
         tile = self.emptyTile.copy()
         # Show current weather icon
@@ -124,8 +109,42 @@ class WeatherTile():
         # return the current weather tile          
         with threadLock:
             return self.tile
+
             
-        
+    # Daytime calculation based on sunrise/sunset
+    def dayTime(self):
+        try:
+            daystart = time2hours(self.weather.astronomy('sunrise'))
+            dayend = time2hours(self.weather.astronomy('sunset'))
+            now = time2hours(time.strftime('%I:%M %p'))
+            if now >= daystart and now <= dayend:
+                dayTime = True
+            else:
+                dayTime = False
+            return dayTime
+        except:
+            return True
+
+    # Returns small icon image for current conditions and time of day
+    def icon(self):
+        try:
+            code = int(self.weather.current('code'))
+            if self.dayTime():
+                img = self.codes[code][2]
+            else:
+                img = self.codes[code][3]
+            img = pygame.transform.scale(img,(80,80))
+            return img
+        except:
+            return None
+
+    # Returns current temperature as text
+    def temperature(self):
+        try:
+            text = str(self.weather.current('temp'))
+            return text
+        except:
+            return None
 
 
 """

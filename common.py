@@ -1,3 +1,4 @@
+import time
 import pygame
 import threading
 import os
@@ -20,7 +21,7 @@ CENTER = 2
 
 
 # RESOURCE DIRECTORIES
-if os.name == "NT":
+if os.name == "nt":
     DIR_DELIM = '\\'
 else:
     DIR_DELIM = '/'
@@ -38,21 +39,23 @@ SND_HOURLY_CHIME = SOUNDS_DIR + 'hourlychimeshort.mp3'
 
 # FONTS
 pygame.font.init()
-fontGiant  = pygame.font.Font('century.ttf',165)
-fontHuge   = pygame.font.Font('century.ttf',90)
-fontLarge  = pygame.font.Font('century.ttf',45)
-fontMedium = pygame.font.Font('century.ttf',35)
-fontSmall  = pygame.font.Font('century.ttf',28)
-fontTiny = pygame.font.Font(None,32)
-fontLCDMedium = pygame.font.Font('lcd.ttf',36)
+fontGiant      = pygame.font.Font('century.ttf',165)
+fontHuge       = pygame.font.Font('century.ttf',90)
+fontVeryLarge  = pygame.font.Font('century.ttf',64)
+fontLarge      = pygame.font.Font('century.ttf',45)
+fontMedium     = pygame.font.Font('century.ttf',35)
+fontSmall      = pygame.font.Font('century.ttf',28)
+fontTiny       = pygame.font.Font(None,32)
+fontLCDMedium  = pygame.font.Font('lcd.ttf',36)
+fontFullscreen = pygame.font.Font('century.ttf',350)
 
 # THREADING
 threadLock = threading.Lock()
-# Creates a new thread object that will run the 'target' function with the provide argument list.
+# Creates a new thread object that will run the 'target' function with the provided argument list.
 # Passing mutable objects (not variables) provides a means for communications with main thread.
-# Global variables can be used at well.
+# Global variables can be used as well.
 # Use a threading.lock object along with 'with:' statement to safely coordinate changes to shared objects.
-# Use thread.isActive() to know if thread is has completed.
+# Use thread.isActive() to know if thread has completed.
 #
 class Thread(threading.Thread):
     def __init__(self, target, *args):
@@ -66,8 +69,10 @@ class Thread(threading.Thread):
 
 # display at text string onto pygame surface at x,y location relative to alignment.
 # returns ending x position and y position for next line adjusting for leading percent (1=100% of normal).
-def textAt(x,y,text,surface,font,color=WHITE,align=LEFT,antialias=0,leading=1):
+def textAt(x,y,text,surface,font,color=WHITE,align=LEFT,alpha=255,antialias=0,leading=1):
     txtImg = font.render(text,antialias,color)
+    if alpha < 255:
+        txtImg.set_alpha(alpha)
     txtWidth = txtImg.get_width()
     txtHeight = txtImg.get_height() * leading
     if align == LEFT:
@@ -104,6 +109,30 @@ def time2hours(t):
         if h == 12:
             h=0
     return h + m / 60.0
+
+# Returns True if the time (minutes) has changed since last call.  The first
+# call sets up the uniqueID with the current time and returns True.  Subsequent
+# calls with that ID examine previous and current time to see if minutes have changed.
+# True will be return and the time is reset to current, so future calls return False
+# until time changes again.
+        
+# Dictionary for time change tracking
+timeSaves = {} 
+
+def hasTimeChanged(uniqueID):
+    currTime = time.strftime("%I%M")        # HHMM format of current time
+    prevTime = timeSaves.get(uniqueID)
+    if prevTime == None:                    # if ID has never been used, create it and return True
+        timeSaves[uniqueID] = currTime
+        return True
+    else:
+        timeSaves[uniqueID] = currTime     # refresh the stored time
+        if currTime == prevTime:          
+            return False
+        else:
+            return True
+
+
 
 # translate compass bearing to text heading
 def compass(bearing):

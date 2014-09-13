@@ -3,6 +3,8 @@ from common import *
 import time
 import gcal
 
+GOOGLE_USER = ""  #Edit to include you Google user account name
+GOOGLE_PW = ""    #and password.
 
 class CalendarTile():
 
@@ -15,7 +17,7 @@ class CalendarTile():
 
 
         #Calendar variables
-        self.calendar = gcal.GCal('***USERNAME***','***PASSWORD***')  #Must provide google account username and password
+        self.calendar = gcal.GCal(GOOGLE_USER,GOOGLE_PW)  #Must provide google account username and password
         self.CAL_UPDATE_INTERVAL = 15     #Minutes between calendar update pulls
         self.nextCalUpdate = 0            #Timestamp for next pull (0 forces immediate pull)
         self.events = []
@@ -33,7 +35,26 @@ class CalendarTile():
         if t[0:1] == '0': #remove leading zero
             t = t[1:]
         return t
-            
+
+    # Return day of week, long form
+    def dow(self):
+        t = time.strftime('%A')
+        return t
+
+    # Return the next upcoming calendar event
+    # Formatted as: mm/dd eventtitle (hh:mma)
+    def nextEvent(self):
+        text = ""
+        if len(self.events) > 0:
+            e = self.events[0]
+            text = str(e.startmon) + "/" + str(e.startday) + "  " + e.title
+            if e.starttime <> "":
+                tm = event.starttime[-7:-1].lower()
+                if tm[0:1] == '0':
+                    tm = tm[1:]
+                text = text + " @ "+tm
+        return text 
+    
     # React to any screen touches
     def processTouch(self,x,y):
         pass
@@ -44,21 +65,8 @@ class CalendarTile():
          # Start with an empty tile
         tile = self.emptyTile.copy()
 
-        # CLOCK
-
-        # Make note if time has changed
-        #currTime = time.strftime('%I:%M')
-        currTime = self.formattedTime()
-        if self.prevTime != currTime:
-            self.timeChanged = True
-        else:
-            self.timeChanged = False
-        self.prevTime = currTime
-        # Hourly Chime
-        if self.timeChanged:
-            if currTime[-2:] == '00':
-                playMP3(SND_HOURLY_CHIME)
         # Show time
+        currTime = self.formattedTime()
         rec = pygame.surface.Surface((255,130))
         rec.fill(BLACK)
         rec.set_alpha(80)
@@ -69,9 +77,8 @@ class CalendarTile():
         #    text = text[1:]
         #x,y = textAt(60,48,text,tile,fontHuge,WHITE)
         x,y = textAt(60,48,currTime,tile,fontHuge,WHITE)
-        # Show DOW
-        text = time.strftime('%A')
-        x,y = textAt(70,137,text,tile,fontLarge,WHITE,LEFT)
+        # Show DOW 
+        x,y = textAt(70,137,self.dow(),tile,fontLarge,WHITE,LEFT)
         # Show date
         rec = pygame.surface.Surface((140,43))
         rec.fill(RED)
@@ -94,7 +101,7 @@ class CalendarTile():
         if time.time() > self.nextCalUpdate:
             try:
                 print time.time(),"GCal: poll started"
-                calendar = gcal.GCal('***USERNAME***','***PASSWORD***')
+                calendar = gcal.GCal('stevej207','1holiday.gm')
                 calendar.connect()
                 self.events = calendar.getEvents()
                 print time.time(),"GCal: poll finished"
@@ -110,11 +117,12 @@ class CalendarTile():
         #Show each event, process reminders as necessary
         count = 0
         y = 212
+        timeChanged = hasTimeChanged('events')
         for event in self.events:
             secsTill = int((event.serialtime - time.time()))
             minsTill = secsTill / 60
             # If event is set for a reminder see if it is time.
-            if self.timeChanged and event.remindermins != 0:
+            if timeChanged and event.remindermins != 0:
                 # Sound chime at reminder time and scheduled time
                 t = time.strftime("%Y-%m-%d %I:%M%p",time.localtime())
                 if t == event.remindertime:

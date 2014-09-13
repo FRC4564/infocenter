@@ -4,10 +4,11 @@ import icons
 import time
 import subprocess
 import os
+import mpc
 
 class RadioTile():
 
-    def __init__(self):
+    def __init__(self,MPDhost='localhost'):
 
         # Init an empty tile        
         self.emptyTile = pygame.image.load(BACKGROUNDS_DIR + 'blank.png').convert_alpha()
@@ -15,19 +16,17 @@ class RadioTile():
         pygame.transform.scale(self.emptyTile,TILE_SIZE)
         # Load radio graphics - play button, stop button, etc.
         self.images = icons.loadRadioImages(RADIO_DIR)
-        # Station number is 1 through 8.
-        self.station = 1
-        self.prevStation = 0
-        self.album = ''
-        self.song = ''
-        self.nextTitleTime = 0 #next time to grab current album and song titles
+        # Station number is 0 through 7.
+        self.station = 0
         # Music playing or stopped
         self.playing = False
-        # Volume - 0 to 10 = 0% to 100%
-        self.volume = 5
-        os.system("mpc volume "+str(self.volume*10))
+        # Create client connection to MPD
+        self.mpc = mpc.MPC(MPDhost)
+        # Volume - 0 to 100 = 0% to 100%
+        self.volume = 50
+        self.mpc.setvol(self.volume)
         # Empty stations from playlist and build anew
-        os.system("mpc clear")
+        self.mpc.clear()
         self.stations = []  #station,url,small image,large image
         #self.loadStation('Radio Paradise','http://stream-sd.radioparadise.com:8056','RadioParadise.png')
         self.loadStation('Radio Paradise','http://stream-dc1.radioparadise.com/mp3-192','RadioParadise.png')
@@ -51,9 +50,62 @@ class RadioTile():
         imgLarge = pygame.transform.scale(imgSmall,(80,80))
         self.stations.append([title,url,imgSmall,imgLarge])
         # Add to play list
-        os.system('mpc add '+url)
+        self.mpc.add(url)
 
 
+    # Increase volume by 10%
+    def volumeUp(self):
+        self.volume = self.mpc.volume + 10
+        if self.volume > 100:
+            self.volume = 100
+        self.mpc.setvol(self.volume)
+        self.repaint = True
+        
+    # Decrease volume by 10%
+    def volumeDown(self):
+        self.volume = self.mpc.volume - 10
+        if self.volume < 0:
+            self.volume = 0
+        self.mpc.setvol(self.volume)
+        self.repaint = True
+
+    # Start/Stop playback
+    def togglePlay(self):
+        self.playing = not self.playing
+        if self.playing:
+            self.mpc.play(self.station)
+        else:
+            self.mpc.stop()
+        self.refresh()
+
+    # Select station (0 - 7) and start playing
+    def selectStation(self,station):
+        self.station = station
+        self.mpc.stop()
+        self.mpc.play(self.station)
+        self.playing = True
+        self.refresh()
+
+    # Return icon of current station or play button
+    def icon(self):
+        if self.mpc.playing:
+            img = self.stations[self.mpc.track][2]
+        else:
+            img = self.images['PlayButton']
+            img = pygame.transform.scale(img,(64,64))
+        return img
+
+    # Return artist and song formatted with hyphen.  "" if not playing.
+    def artist_song(self):
+        if self.mpc.playing:
+            if self.mpc.song == "":
+                t = self.mpc.artist
+            else:
+                t = self.mpc.artist + " - " + self.mpc.song
+        else:
+            t = ""
+        return t
+        
     # Process the touch input (or click) at x,y relative to top left corner of tile
     def processTouch(self,x,y):
         # In Stations grid?
@@ -67,48 +119,35 @@ class RadioTile():
             if x > 48 and x < 480:
                 col = (x - 48) / 108
                 # select the station
-                self.station = row * 4 + col + 1
-                os.system("mpc stop && mpc play "+str(self.station))
-                self.playing = True
-                self.refresh()
+                self.station = row * 4 + col
+                self.selectStation(self.station)
         # Play or Stop button
         elif x > 75 and x < 180 and y > 420 and y < 550:
-            self.playing = not self.playing
-            if self.playing:
-                os.system("mpc play "+str(self.station))
-            else:
-                os.system("mpc stop")
-            self.refresh()
+            self.togglePlay()
         # Volume down
         elif x > 200 and x <300 and y > 420 and y < 550:
-            if self.volume > 0:
-                self.volume -= 1
-                os.system("mpc volume "+str(self.volume*10))
-                self.repaint = True
+            self.volumeDown()
         # Volume up
         elif x > 360 and x < 470 and y > 420 and y < 550:
-            if self.volume < 10:
-                self.volume += 1
-                os.system("mpc volume "+str(self.volume*10))
-                self.repaint = True
+            self.volumeUp()
             
 
     # Paints entire tile. This should happen whenever station changes.
     def _paint(self):
         # start with empty tile
         tile = self.emptyTile.copy()
-        # Shaded rectnage for Staion and Song title
+        # Shaded rectangle for Station and Song title
         shade(55,55,410,125,tile,BLACK,80)
         # Show selected station image 
-        tile.blit(self.stations[self.station-1][3],(400,32))
+        tile.blit(self.stations[self.station][3],(400,32))
         # Show two rows of 4 station buttons
-        pos = 1
+        pos = 0
         for row in range(0,2):
             for col in range (0,4):
                 x = col * 109 + 60
                 y = row * 114 + 205
                 # show station logo
-                tile.blit(self.stations[pos-1][2],(x+7,y+7))
+                tile.blit(self.stations[pos][2],(x+7,y+7))
                 # show border around station
                 if pos == self.station:
                     # "Selected" tile is a bit bigger and must be offset a bit
@@ -123,9 +162,11 @@ class RadioTile():
         else:
             tile.blit(self.images['PlayButton'],(76,405))
         # Volume level
+	self.volume = self.mpc.volume
+	level = int(self.volume/10)
         for i in range (0,10):
             x = i * 24 + 220
-            if i < self.volume:
+            if i < level:
                 tile.fill(WHITE,(x,448,12,60))
             else:
                 pygame.draw.rect(tile,WHITE,(x,448,13,60),1)
@@ -139,37 +180,24 @@ class RadioTile():
             self.tile = tile.copy()
 
 
-    # If we need to update the tile start a thread to paint it and return current tile
+    # If we need to update the tile start a thread to paint it, but return current tile
     def paint(self):
-        # Whenever station is changed or repaint flagged, paint the tile
-        if self.station <> self.prevStation or self.repaint:
-            # if we aren't running a thread to already, start one.
-            if not self.thread.isAlive():
-                self.prevStation=self.station
-                self.repaint = False
+        # Whenever play state, station, volume is changed or repaint flagged, start painting the tile
+        if not self.thread.isAlive():   #As long as we don't have a thread already painting
+            if self.playing <> self.mpc.playing or self.volume <> self.mpc.volume or self.station <> self.mpc.track or self.repaint:
+                self.repaint = False  #This satifies a repaint request
+                self.playing = self.mpc.playing
+                self.volume = self.mpc.volume
+                self.station = self.mpc.track
                 self.thread = Thread(self._paint)
                 self.thread.start()
         # return the most recently updated tile
         with threadLock:
             tile = self.tile.copy()
         # Show Radio station, Album and Song
-        x,y = textAt(64,60,self.stations[self.station-1][0],tile,fontMedium,WHITE)
-        # Every couple seconds, update album and song title
-        if self.playing and time.time() > self.nextTitleTime and os.name<>'NT':
-            self.nextTitleTime = time.time() + 2
-            txt = subprocess.check_output(['mpc','--format','%title%','current'],shell=False)
-            txt = txt[:-1]  #drop trailing linefeed char
-            txtList = txt.split(' - ')
-            if len(txtList)>0:
-                self.album = txtList[0]
-            else:
-                self.album = ''
-            if len(txtList) > 1:
-                self.song = txtList[1]
-            else:
-                self.song = ''
-        x,y = textAt(64,y,self.album,tile,fontSmall,WHITE)
-        x,y = textAt(64,y,self.song,tile,fontSmall,WHITE)
+        x,y = textAt(64,60,self.stations[self.station][0],tile,fontMedium,WHITE)
+        x,y = textAt(64,y,self.mpc.artist,tile,fontSmall,WHITE)
+        x,y = textAt(64,y,self.mpc.song,tile,fontSmall,WHITE)
         # return the constructed tile surface
         return tile
 
@@ -177,11 +205,10 @@ class RadioTile():
     def refresh(self):
         self.album = ''
         self.song = ''
-        self.nextTitleTime = time.time() + 0.5  #when switching channels, wait for the stream to update
         self.repaint = True
 
 
-            
-        
-        
-        
+                
+    def close(self):
+	self.mpc.stop()
+	self.mpc.close()

@@ -94,15 +94,3 @@ class GCal():
 
 
 
-
-
-
-""" TESTING
-gc = GCal('username','password')
-gc.connect()
-events = gc.getEvents()
-for event in events:
-    print event.startmonth,event.startday,event.title,event.allday,event.starttime,event.startmon,event.startday,event.startyear
-"""
-
-
