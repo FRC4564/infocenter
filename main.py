@@ -15,8 +15,9 @@ if os.name == "nt":
     MOUSE = True   
 else:
     MOUSE = False
+MOUSE = True
 
-MODE = "fullscreen"   #Mode is either 'tiled' or 'fullscreen'
+MODE = "tiled"   #Mode is either 'tiled' or 'fullscreen'
 
 # Combines background images with left and right tiles and refreshes display
 # at a set periodic rate, when 'continuous' is called as a thread.
@@ -27,6 +28,7 @@ class Painter():
         self.change=True    #Schedule background to change
         self.leftTile=leftTile
         self.rightTile=rightTile
+        self.running=True   #Run repaint continuously until requested to stop
 
     # Set background image with overlay and save copy for normal refresh cycles
     def setBackground(self):
@@ -63,7 +65,7 @@ class Painter():
             
     def continuous(self):
         fpsClock=pygame.time.Clock()
-        while True:
+        while self.running:
             #Has a background change been requested
             if self.change:
                 self.change = False
@@ -95,7 +97,10 @@ class Painter():
             
             pygame.display.update()
             #throttle to 3 frames per second
-            fpsClock.tick(3)    
+            fpsClock.tick(4)
+
+    def stop(self):
+        self.running = False
             
 # Init sound
 pygame.mixer.init(22050,-16,1,1024)
@@ -130,9 +135,9 @@ backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'GreenFabric.png').conver
 backgrounds[len(backgrounds)-1] = pygame.transform.scale(backgrounds[len(backgrounds)-1],DISPLAY_RES)
 backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'BlueLeaf.jpg').convert())
 backgrounds[len(backgrounds)-1] = pygame.transform.scale(backgrounds[len(backgrounds)-1],DISPLAY_RES)
-backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'StarField.png').convert())
+backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'Xmas1.png').convert())
 backgrounds[len(backgrounds)-1] = pygame.transform.scale(backgrounds[len(backgrounds)-1],DISPLAY_RES)
-backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'BlackLeather.jpg').convert())
+backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'Xmas2.png').convert())
 backgrounds[len(backgrounds)-1] = pygame.transform.scale(backgrounds[len(backgrounds)-1],DISPLAY_RES)
 backgrounds.append(pygame.image.load(BACKGROUNDS_DIR + 'BlueGraph.jpg').convert())
 backgrounds[len(backgrounds)-1] = pygame.transform.scale(backgrounds[len(backgrounds)-1],DISPLAY_RES)
@@ -282,7 +287,11 @@ try:
         
         
 finally:
-    radio.close()
+    painter.stop()  #stop repaints from occuring
+    radio.close()   #stop radio from playing
+    # wait for current paint threads to finish
+    while calendar.running() or weather.running() or radio.running() or fullscreen.running():
+        time.sleep(.1)
     pygame.display.quit()
     pygame.quit()
 
