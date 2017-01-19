@@ -1,7 +1,7 @@
 InfoCenter
 ==========
 
-Raspberry Pi-based, touchscreen-enabled, information center that provides weather, time, hourly chimes, Google calendar with alarms and Internet radio.  
+A Raspberry Pi-based, touchscreen-enabled, information center that provides weather, time, hourly chimes, Google calendar with alarms and Internet radio.  
 
 Python and Pygame were used to code the graphical user interface.  The screen is divided into two tiles, left and right.  Pressing the left or right edges of the screen swaps out the tile for one that is not showing.  Currently, 3 tiles exist--Radio, Weather, and Calendar.  And more recently, I've added a full-screen mode which focuses on showing the time and in the corners show current information for weather, radio and date.  Pressing the top-center of the screen will switch between tiled and full-screen modes.
 
@@ -39,6 +39,6 @@ Spacebar -Play/Pause radio
 
 Esc - Exit infocenter 
 
-This is very much a work in process.  I'm still building new functionality and cleaning up code.  The next area of development is to setup a INI file for all configuration parameters.  I'm also thinking of building a photoframe option for the full-screen mode, which could access photos from a network share our other service.  I'd also like to develop other tiles, such as a twitter feed and an SMB network music player. 
+I've included some basic setup instructions in repsository. Hopefully that's enough to get things working for you, if you'd like to get infocenter running.  I'm still running this on Raspbian Wheezy on an older RPi, so not sure how it fairs with new OS versions.  If you have any questions, I'll do my best to answer.
 
-I'm just starting to document this project.  Check out my blog at http://mypicorner.blogspot.com/.
+Enjoy!!!
