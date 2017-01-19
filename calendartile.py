@@ -1,10 +1,8 @@
 import pygame
 from common import *
 import time
-import gcal
+import google
 
-GOOGLE_USER = ""  #Edit to include you Google user account name
-GOOGLE_PW = ""    #and password.
 
 class CalendarTile():
 
@@ -17,11 +15,14 @@ class CalendarTile():
 
 
         #Calendar variables
-        self.calendar = gcal.GCal(GOOGLE_USER,GOOGLE_PW)  #Must provide google account username and password
+        self.credentials = google.getCredentials()
+        self.calendar = google.GCal(self.credentials)     #Establish connection to Google calendar
         self.CAL_UPDATE_INTERVAL = 15     #Minutes between calendar update pulls
         self.nextCalUpdate = 0            #Timestamp for next pull (0 forces immediate pull)
         self.events = []
-        self.calendarThread = Thread('')  #Empty thread, ready for use.
+        
+        self.paintThread = Thread('')  #Empty thread, ready for use.
+    
 
         #Clock variables
         self.nextClockUpdate = time.time()     #Clock updates will be scheduled to run every second
@@ -49,7 +50,7 @@ class CalendarTile():
             e = self.events[0]
             text = str(e.startmon) + "/" + str(e.startday) + "  " + e.title
             if e.starttime <> "":
-                tm = event.starttime[-7:-1].lower()
+                tm = e.starttime[-7:-1].lower()
                 if tm[0:1] == '0':
                     tm = tm[1:]
                 text = text + " @ "+tm
@@ -98,13 +99,10 @@ class CalendarTile():
 
         # CALENDAR EVENTS
 
+        # When its time, update calendar event data
         if time.time() > self.nextCalUpdate:
             try:
-                print time.time(),"GCal: poll started"
-                calendar = gcal.GCal('stevej207','1holiday.gm')
-                calendar.connect()
-                self.events = calendar.getEvents()
-                print time.time(),"GCal: poll finished"
+                self.events = self.calendar.getEvents()
             except:
                 print "Calendar poll failed at "+currTime
             self.nextCalUpdate = time.time() + 60 * self.CAL_UPDATE_INTERVAL
@@ -153,7 +151,7 @@ class CalendarTile():
             if event.remindermins > 0:
                 tile.blit(self.imgAlarmBell,(x-34,y-36))
             # Title
-            text = event.title[0:18]
+            text = event.title[0:27]
             x,y = textAt(80,y,text,tile,fontSmall,WHITE)
             # show 4 records at most
             count += 1
@@ -165,6 +163,9 @@ class CalendarTile():
             self.tile = tile.copy()
 
 
+    # Is paint thread running?
+    def running(self):
+        return self.paintThread.isAlive()
 
 
     # If we need to update the tile start a thread to paint it and return current tile
@@ -172,11 +173,11 @@ class CalendarTile():
         # is it time to get a calendar update?
         if time.time() > self.nextClockUpdate:
             # if we aren't running a thread, time to start one.
-            if not self.calendarThread.isAlive():
-                #print time.time(),"Calendar: Starting Thread"
-                self.nextClockUpdate += 1     #Reschedule to occur in a second
-                self.calendarThread = Thread(self._paint)
-                self.calendarThread.start()
+            if not self.running():      #self.calendarThread.isAlive():
+                self.nextClockUpdate += 1     #Reschedule to re-occur in 1 second
+                self.paintThread = Thread(self._paint)
+                self.paintThread.start()
         # return the current tile          
         with threadLock:
             return self.tile
+
