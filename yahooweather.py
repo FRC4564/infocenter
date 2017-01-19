@@ -5,7 +5,7 @@ import json
 
 Usage example:
 
-    w = yahooweather.Weather('04401')   #Create weather instance based on zipcode
+    w = yahooweather.Weather('Brewer,ME')   #Create weather instance based on zipcode
     w.fetch()                           #Fetch weather update
     print w.current('temp')             #Current temperature
     print w.forecast('day',0)           #Current day of week
@@ -15,8 +15,9 @@ Usage example:
 
 class Weather():
 
-    def __init__(self,zip='04412'):
-        self.url = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20location%3D%22'+zip+'%22&format=json'
+    def __init__(self,location='Brewer,ME'):
+        #self.url = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20location%3D%22'+zip+'%22&format=json'
+        self.url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text=%22"+location+"%22)&format=json"
 
     # Fetch the weather from Yahoo
     # Returns True if successful
