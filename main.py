@@ -15,7 +15,7 @@ if os.name == "nt":
     MOUSE = True   
 else:
     MOUSE = False
-MOUSE = True
+MOUSE = True  #Fourcing Mouse mode over touchscreen mode.  Adjust for your h/w.
 
 MODE = "tiled"   #Mode is either 'tiled' or 'fullscreen'
 
@@ -279,6 +279,7 @@ try:
 
         # Throttle loop to 15 frames per second
         uiClock.tick(15)
+        
         #s="fps:"+str(uiClock.get_fps())
         #txtImg = fontSmall.render(s,1,WHITE)
         #scr.blit(txtImg,(0,0))
@@ -288,10 +289,14 @@ try:
         
 finally:
     painter.stop()  #stop repaints from occuring
-    radio.close()   #stop radio from playing
+    try:
+        radio.close()   #stop radio from playing
+    except:
+        pass
     # wait for current paint threads to finish
-    while calendar.running() or weather.running() or radio.running() or fullscreen.running():
-        time.sleep(.1)
+    time.sleep(1)
+    #while calendar.running() or weather.running() or radio.running() or fullscreen.running():
+    #    time.sleep(.1)
     pygame.display.quit()
     pygame.quit()
 

@@ -1,91 +1,98 @@
 import pygame
-# Weather Icons to support Yahoo codes for Day/Night and Large and Small
+# Weather Icons to support OpenWeather ID codes for Day/Night and Large and Small
 
-# Seq number: Yahoo Code number, Text Desc, daytime icon file, nighttime icon file
-# See icons at Yahoo - ex: icon 41 - http://l.yimg.com/a/i/us/we/52/41.gif 
-WeatherCodes=[
-[0, 'Tornado',                'MostlyCloudy.png',      'MostlyCloudyNight.png'    ],
-[1, 'Tropical storm',         'Hurricane.png',         'Hurricane.png'            ],
-[2, 'Hurricane',              'Hurricane.png',         'Hurricane.png'            ],
-[3, 'Severe thunderstorms',   'Thunderstorm.png',      'Thunderstorm.png'         ],
-[4, 'Thunderstorms',          'Thunderstorm.png',      'Thunderstorm.png'         ],
-[5, 'Rain snow mix',          'SnowRain.png',          'SnowRain.png'             ], 
-[6, 'Rain sleet mix',         'IcyRain.png',           'IcyRain.png'              ],
-[7, 'Snow sleet mix',         'IceSnow.png',           'IceSnow.png'              ],
-[8, 'Freezing drizzle',       'Ice.png',               'Ice.png'                  ],
-[9, 'Drizzle',                'LightRain.png',         'LightRain.png'            ],
-[10,'Freezing rain',          'IcyRain.png',           'IcyRain.png'              ],  
-[11,'Showers',                'HeavyRain.png',         'HeavyRain.png'            ],
-[12,'Showers',                'HeavyRain.png',         'HeavyRain.png'            ],
-[13,'Snow flurries',          'LightSnow.png',         'LightSnow.png'            ],
-[14,'Light snow',             'LightSnow.png',         'LightSnow.png'            ],
-[15,'Blowing snow',           'HeavySnow.png',         'HeavySnow.png'            ],
-[16,'Snow',                   'HeavySnow.png',         'HeavySnow.png'            ],
-[17,'Hail',                   'Ice.png',               'Ice.png'                  ],
-[18,'Sleet',                  'Ice.png',               'Ice.png'                  ],
-[19,'Dust',                   'FogDay.png',            'FogNight.png'             ],
-[20,'Foggy',                  'FogDay.png',            'FogNight.png'             ],
-[21,'Haze',                   'FogDay.png',            'FogNight.png'             ],
-[22,'Smoky',                  'FogDay.png',            'FogNight.png'             ],
-[23,'Blustery',               'Windy.png',             'Windy.png'                ],
-[24,'Windy',                  'Windy.png',             'Windy.png'                ],
-[25,'Cold',                   'Cold.png',              'Cold.png'                 ],
-[26,'Cloudy',                 'Cloudy.png',            'Cloudy.png'               ],
-[27,'Mostly cloudy',          'MostlyCloudy.png',      'MostlyCloudyNight.png'    ],
-[28,'Mostly cloudy',          'MostlyCloudy.png',      'MostlyCloudyNight.png'    ],
-[29,'Partly cloudy',          'PartlyCloudy.png',      'PartlyCloudyNight.png'    ],
-[30,'Partly cloudy',          'PartlyCloudy.png',      'PartlyCloudyNight.png'    ],
-[31,'Clear',                  'Sunny.png',             'ClearNight.png'           ],
-[32,'Sunny',                  'Sunny.png',             'ClearNight.png'           ],
-[33,'Fair',                   'Fair.png',              'FairNight.png'            ],
-[34,'Fair',                   'Fair.png',              'FairNight.png'            ],
-[35,'Rain and hail mix',      'IcyRain.png',           'IcyRain.png'              ],
-[36,'Hot',                    'Hot.png',               'Hot.png'                  ],
-[37,'Isolated thunderstorms', 'Thunderstorm.png',      'Thunderstorm.png'         ],
-[38,'Scattered thunderstorms','Thunderstorm.png',      'Thunderstorm.png'         ],
-[39,'Scattered thunderstorms','Thunderstorm.png',      'Thunderstorm.png'         ],
-[40,'Scattered showers',      'HeavyRain.png',         'HeavyRain.png'            ],
-[41,'Heavy snow',             'HeavySnow.png',         'HeavySnow.png'            ],
-[42,'Snow showers',           'LightSnow.png',         'LightSnow.png'            ],
-[43,'Heavy snow',             'HeavySnow.png',         'HeavySnow.png'            ],
-[44,'Partly cloudy',          'PartlyCloudy.png',      'PartlyCloudyNight.png'    ],
-[45,'Thundershowers',         'Thunderstorm.png',      'Thunderstorm.png'         ],
-[46,'Snow showers',           'LightSnow.png',         'LightSnow.png'            ],
-[47,'Thundershowers',         'Thunderstorm.png',      'Thunderstorm.png'         ]]
+weatherIDs = {200: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    201: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    202: {'description': 'Severe thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    210: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    211: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    212: {'description': 'Severe thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    221: {'description': 'Scattered thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    230: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    231: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    232: {'description': 'Thunderstorms', 'imageday': 'Thunderstorm.png', 'imagenight': 'Thunderstorm.png'},
+    300: {'description': 'Drizzle', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    301: {'description': 'Drizzle', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    302: {'description': 'Drizzle', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    310: {'description': 'Drizzle', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    311: {'description': 'Drizzle', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    312: {'description': 'Rain', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    313: {'description': 'Rain', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    314: {'description': 'Rain', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    321: {'description': 'Rain', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    500: {'description': 'Rain', 'imageday': 'LightRain.png', 'imagenight': 'LightRain.png'},
+    501: {'description': 'Showers', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    502: {'description': 'Heavy Rain', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    503: {'description': 'Heavy Rain', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    504: {'description': 'Heavy Rain', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    511: {'description': 'Freezing rain', 'imageday': 'IcyRain.png', 'imagenight': 'IcyRain.png'},
+    520: {'description': 'Showers', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    521: {'description': 'Showers', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    522: {'description': 'Heavy Rain', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    531: {'description': 'Scattered showers', 'imageday': 'HeavyRain.png', 'imagenight': 'HeavyRain.png'},
+    600: {'description': 'Light snow', 'imageday': 'LightSnow.png', 'imagenight': 'LightSnow.png'},
+    601: {'description': 'Snow', 'imageday': 'HeavySnow.png', 'imagenight': 'HeavySnow.png'},
+    602: {'description': 'Heavy Snow', 'imageday': 'HeavySnow.png', 'imagenight': 'HeavySnow.png'},
+    611: {'description': 'Sleet', 'imageday': 'Ice.png', 'imagenight': 'Ice.png'},
+    612: {'description': 'Rain sleet mix', 'imageday': 'IcyRain.png', 'imagenight': 'IcyRain.png'},
+    613: {'description': 'Rain sleet mix', 'imageday': 'IcyRain.png', 'imagenight': 'IcyRain.png'},
+    615: {'description': 'Rain snow mix', 'imageday': 'SnowRain.png', 'imagenight': 'SnowRain.png'},
+    616: {'description': 'Rain snow mix', 'imageday': 'SnowRain.png', 'imagenight': 'SnowRain.png'},
+    620: {'description': 'Rain snow mix', 'imageday': 'SnowRain.png', 'imagenight': 'SnowRain.png'},
+    621: {'description': 'Snow', 'imageday': 'HeavySnow.png', 'imagenight': 'HeavySnow.png'},
+    622: {'description': 'Heavy Snow', 'imageday': 'HeavySnow.png', 'imagenight': 'HeavySnow.png'},
+    701: {'description': 'Haze', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    711: {'description': 'Smoke', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    721: {'description': 'Haze', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    731: {'description': 'Dust', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    741: {'description': 'Fog', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    751: {'description': 'Dust', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    761: {'description': 'Dust', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    762: {'description': 'Dust', 'imageday': 'FogDay.png', 'imagenight': 'FogNight.png'},
+    771: {'description': 'Windy', 'imageday': 'Windy.png', 'imagenight': 'Windy.png'},
+    781: {'description': 'Tornado', 'imageday': 'MostlyCloudy.png', 'imagenight': 'MostlyCloudyNight.png'},
+    800: {'description': 'Clear', 'imageday': 'Sunny.png', 'imagenight': 'ClearNight.png'},
+    801: {'description': 'Fair', 'imageday': 'Fair.png', 'imagenight': 'FairNight.png'},
+    802: {'description': 'Partly cloudy', 'imageday': 'PartlyCloudy.png', 'imagenight': 'PartlyCloudyNight.png'},
+    803: {'description': 'Mostly cloudy', 'imageday': 'MostlyCloudy.png', 'imagenight': 'MostlyCloudyNight.png'},
+    804: {'description': 'Cloudy', 'imageday': 'Cloudy.png', 'imagenight': 'Cloudy.png'}}
 
-
-def loadWeatherCodes(directory,images = {}):
-    # Load image files
+# Load weather icons and build into dictionary of weather codes
+def loadWeatherCodes(directory):
+    # build a dictionary of unique image filenames and load the image files.
+    # Both normal-sized and small-sized (50x50) icons files are loaed.  
     images = {}
-    # build a dictionary of unique image filenames and loaded image file.
-    for code in WeatherCodes:
-        for i in range(2,4):
-            if code[i] != '':
-                if not images.has_key(code[i]):
-                    images[code[i]] = pygame.image.load(directory + code[i]).convert_alpha()
-                    images["sml"+code[i]] = pygame.transform.scale(images[code[i]],(50,50))
-             
+    for id in weatherIDs:
+        code = weatherIDs[id]
+        for i in ['imageday', 'imagenight']:
+            if not images.has_key(code[i]):
+                images[code[i]] = pygame.image.load(directory + code[i]).convert_alpha()
+                images["sml"+code[i]] = pygame.transform.scale(images[code[i]],(50,50))
+    """# For each weather ID, create array of codes, descriptions,day image, night image, sml image         
     codes = []
-    for code in WeatherCodes:
-        # Choose image for day time
-        if code[2] == '':
-            dayimg = images['Sunny.png']
-            smlimg = images['smlSunny.png']
-        else:
-            dayimg = images[code[2]]
-            smlimg = images['sml'+code[2]]
-        # Choose image for night time
-        if code[3] == '':
-            nightimg = images['ClearNight.png']
-        else:
-            nightimg = images[code[3]]
-        # Add to icons list: Weather Code, Description, Daytime image, Nighttime image, Small image
-        codes.append([code[0],code[1],dayimg,nightimg,smlimg])
+    for id in weatherIDs:
+        code = weatherIDs[id]
+        # Select the image files to associate
+        dayimg = images[code['imageday']]
+        smlimg = images['sml'+code['imageday']]
+        nightimg = images[code['imagenight']]
+        # Add to icons list: Weather ID, Description, Daytime image, Nighttime image, Small image
+        codes.append([id,code['description'],dayimg,nightimg,smlimg])
     return images,codes
-               
-#imgIcons,weatherCodes = loadWeatherCodes('icons\\')
-#print weatherCodes[2]
+    """
+    return images
 
+"""
+# testing
+pygame.init()
+scr = pygame.display.set_mode([640,480])
+imgIcons = loadWeatherCodes('icons\\')
+print imgIcons
+
+scr.blit(imgIcons['HeavyRain.png'],(20,20))
+scr.blit(imgIcons['smlThunderstorm.png'],(0,0))
+pygame.display.update()
+"""
 
 def loadRadioImages(directory):
     images = {}

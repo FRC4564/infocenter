@@ -1,6 +1,7 @@
 import pygame
 from common import *
-import yahooweather
+#import yahooweather
+import openweather
 import icons
 import time
 
@@ -12,11 +13,12 @@ class WeatherTile():
         pygame.transform.scale(self.emptyTile,TILE_SIZE)
 
         # Load weather codes and images
-        self.icons,self.codes = icons.loadWeatherCodes(ICONS_DIR)
+        #self.icons,self.codes = icons.loadWeatherCodes(ICONS_DIR)
+        self.images = icons.loadWeatherCodes(ICONS_DIR)
 
         # setup weather object
 
-        self.weather = yahooweather.Weather()
+        self.weather = openweather.Weather()
         self.UPDATE_INTERVAL = 15    #Minutes between weather update pulls
         self.nextUpdate = 0          #Timestamp for next pull (0 forces immediate pull)
 
@@ -49,55 +51,58 @@ class WeatherTile():
             # Start with an empty tile
             tile = self.emptyTile.copy()
             # Show current weather icon
-            code = int(self.weather.current('code'))
-            if self.dayTime():
-                img = self.codes[code][2]
+            """
+            daytime = self.weather.current['daytime']
+            if daytime:
+                img = self.images[self.weather.current['imageday']]
             else:
-                img = self.codes[code][3]            
+                img = self.images[self.weather.current['imagenight']]
+            """
+            img = self.images[self.weather.current['image']]
             tile.blit(img,(0,15))
             # Show current temp
-            text = str(self.weather.current('temp'))
+            text = str(self.weather.current['temp'])
             textAt(432,33,text,tile,fontGiant,BLACK,RIGHT)
             textAt(430,30,text,tile,fontGiant,WHITE,RIGHT)
             textAt(432,68,"O",tile,fontLarge,BLACK)
             textAt(430,65,"O",tile,fontLarge)
             # Show weather description text
-            text = self.codes[code][1]
+            text = self.weather.current['description']
             x,y = textAt(35,232,text,tile,fontMedium)
-            if self.weather.wind('chill') != self.weather.current('temp'):
+            if self.weather.current['windchill'] != self.weather.current['temp']:
                 newx,newy = textAt(35,285,"Feels like ",tile,fontSmall)
-                text = str(self.weather.wind('chill')) + u'\u00B0'
+                text = str(self.weather.current['windchill']) + u'\u00B0'
                 textAt(newx,275-7,text,tile,fontLarge)
             # Show Wind direction and speed
-            if self.weather.wind('speed') == '':
+            if self.weather.current['windspeed'] == '0':
                 newx,newy = textAt(465,232,'Calm',tile,fontMedium,WHITE,RIGHT)
             else:
-                text =  str(self.weather.wind('speed'))
-                newx,newy = textAt(465,239,' mph',tile,fontSmall,WHITE,RIGHT)
+                text =  str(self.weather.current['windspeed'])
+                if self.weather.units == "imperial":
+                    newx,newy = textAt(465,239,' mph',tile,fontSmall,WHITE,RIGHT)
+                else:
+                    newx,newy = textAt(465,239,' kph',tile,fontSmall,WHITE,RIGHT)                    
                 newx,newy = textAt(newx,222,text,tile,fontLarge,WHITE,RIGHT)
-                text = compass(self.weather.wind('direction'))
+                text = compass(self.weather.current['winddirection'])
                 textAt(465,newy,text,tile,fontMedium,WHITE,RIGHT)
             # Show low and high temps
             starty = 330
             startx = 20
-            #rec = pygame.surface.Surface((90*5-5,36))
-            #rec.fill(BLACK)
-            #rec.set_alpha(60)
-            #surfWeather.blit(rec,(startx+5,starty+4))
             shade(startx+5,starty+4,90*5-5,36,tile,BLACK,60)
             for i in range(0,5):
                 centerx = startx + 45 + i * 90
-                text = self.weather.forecast('day',i)
+                f = self.weather.forecasts[i]
+                text = f['dow']
                 x,y = textAt(centerx,starty,text,tile,fontMedium,WHITE,CENTER)
                 # Show icon
-                code = int(self.weather.forecast('code',i))
-                img = self.codes[code][4]
+                imgFile = 'sml'+ f['image']
+                img = self.images[imgFile]
                 tile.blit(img,(centerx-25,y))
                 # High and Low temps
                 y += 50
-                text = str(self.weather.forecast('high',i)) + u'\u00B0'
+                text = str(f['hightemp']) + u'\u00B0'
                 x,y = textAt(centerx+5,y,text,tile,fontLarge,WHITE,CENTER)
-                text = str(self.weather.forecast('low',i)) + u'\u00B0'
+                text = str(f['lowtemp']) + u'\u00B0'
                 textAt(centerx+5,y,text,tile,fontMedium,WHITE,CENTER)
             # Show last update info
             # text = self.weather.info('title')
@@ -124,7 +129,7 @@ class WeatherTile():
         with threadLock:
             return self.tile
 
-            
+    """        
     # Daytime calculation based on sunrise/sunset
     def dayTime(self):
         try:
@@ -138,19 +143,26 @@ class WeatherTile():
             return dayTime
         except:
             return True
-
-    # Returns small icon image for current conditions and time of day
+    """
+    
+    # Returns medium-sized icon image for current conditions and time of day
     def icon(self):
         try:
-            code = int(self.weather.current('code'))
-            if self.dayTime():
-                img = self.codes[code][2]
-            else:
-                img = self.codes[code][3]
+            img = self.images[self.weather.current['image']]
             img = pygame.transform.scale(img,(80,80))
             return img
         except:
             return None
+
+
+    #
+    def temperature(self):
+        try:
+            return int(self.weather.current['temp'])
+        except:
+            return None
+
+    """
 
     # Returns current temperature as text
     def temperature(self):
@@ -163,6 +175,8 @@ class WeatherTile():
 
 """
 
+"""
+# test
 pygame.init()
 scr = pygame.display.set_mode(DISPLAY_RES)
 img = pygame.image.load(BACKGROUNDS_DIR+'BlueSweep.png').convert()
@@ -195,9 +209,4 @@ try:
 finally:
     pygame.display.quit()
     pygame.quit()
-
 """
-
-
-        
-        

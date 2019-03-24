@@ -39,15 +39,15 @@ class MPC():
 				# expect OK MPD response
 				line = self._read()
 				if line.startswith("OK MPD") <> True:
-					print "Expected OK MPD response, but got " + line
+					print "MPC.PY: Expected OK MPD response, but got " + line
 					raise ioError
 			except:
 				if self.socket is not None:
 					self.socket.close()
 				err = sys.exc_info()[0]
-				print "Socket failed to connect - retrying in 2 secs",err
+				print "MPC.PY: Socket failed to connect - retrying in 60 secs",err
 				self.socket = None
-				time.sleep(2)
+				time.sleep(60)
 				
         # Read a line from the MPD socket
 	def _read(self):
@@ -189,4 +189,7 @@ class MPC():
 	# Shuts down the processor and closes the socket
 	def close(self):
 		self._run = False
-		self.socket.close()
+		try:
+                        self.socket.close()
+                except:
+                        pass

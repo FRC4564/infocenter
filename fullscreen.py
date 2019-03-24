@@ -41,7 +41,7 @@ class Fullscreen():
         text = self.weatherTile.temperature()
         if text <> None:
             #textAt(1006,-6,text,screen,fontVeryLarge,BLACK,RIGHT)
-            textAt(1006,-8,text,screen,fontVeryLarge,WHITE,RIGHT)
+            textAt(1006,-8,str(text),screen,fontVeryLarge,WHITE,RIGHT)
             #textAt(1006,-9,"o",screen,fontMedium,BLACK)
             textAt(1006,-11,"o",screen,fontMedium,WHITE)
         # Show weather icon in lower-right
