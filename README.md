@@ -1,13 +1,13 @@
 InfoCenter
 ==========
 
-A Raspberry Pi-based, touchscreen-enabled, information center that provides weather, time, hourly chimes, Google calendar with alarms and Internet radio.  
+A Raspberry Pi-based, touchscreen-enabled, information center that provides weather, time, hourly chimes, Google calendar with alarms and Internet radio.  Uses Python 2.7.  See included install notes for setup.
 
 Python and Pygame were used to code the graphical user interface.  The screen is divided into two tiles, left and right.  Pressing the left or right edges of the screen swaps out the tile for one that is not showing.  Currently, 3 tiles exist--Radio, Weather, and Calendar.  And more recently, I've added a full-screen mode which focuses on showing the time and in the corners show current information for weather, radio and date.  Pressing the top-center of the screen will switch between tiled and full-screen modes.
 
 The Radio tile uses music player daemon and a custom-coded client to stream internet radio.  There are 8 presets stations presented as icons.  Artist and song title will appear in the top box of the tile, when available.  Volume can be adjusted by tapping on the left or right side of the volume level indicator at the bottom of the tile.
 
-The Weather tile taps into Yahoo's weather api to provide current conditions as well as a 5-day forecast.  Over 20 custom-drawn weather icons provide a visual cue to weather conditions and vary for day or night.  Current conditions are detailed with temperature, condition text, wind speed, wind direction and wind chill.  The 5-day forecast provides an icon for condition and high and low temps. 
+The Weather tile taps into OpenWeatherMaps weather api to provide current conditions as well as a 5-day forecast.  Over 20 custom-drawn weather icons provide a visual cue to weather conditions and vary for day or night.  Current conditions are detailed with temperature, condition text, wind speed, wind direction and wind chill.  The 5-day forecast provides an icon for condition and high and low temps. 
 
 ![](https://raw.githubusercontent.com/FRC4564/InfoCenter/master/screenshot1.jpg)
 
