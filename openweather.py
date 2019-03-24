@@ -25,7 +25,7 @@ class Weather():
         self.updateInterval = 15 * 60  #In seconds
         self.currentURL = ""
         self.forecastURL = ""
-        self.setLocationByID(locationID)
+        self.setLocationByID(self.locationID)
         self.current = {}    #Current weather
         self.forecasts = []   #Forecast for next 5 days
 
